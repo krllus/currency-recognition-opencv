@@ -4,10 +4,43 @@ import numpy as np
 
 from lib import glib
 
+# global frame, captured by the webcam
+frame = 0
 
-def my_awesome_function():
-    # TODO finish this awesome function where all the calculations will be performed
-    print "this function is awesome"
+
+def recognize_bill(descriptor, bill_name):
+    global frame
+    count = 0
+    bill_center = (0, 0)
+    for h, des in enumerate(descriptor):
+        # des = np.array(des,np.float32).reshape((1,128))
+        des = np.array(des, np.float32).reshape(1, len(des))
+        # retval, results, neigh_resp, dists = knn.find_nearest(des,1)
+        retval, results, neigh_resp, dists = knn.findNearest(des, 1)
+        res, distance = int(results[0][0]), dists[0][0]
+
+        x, y = kp[res].pt
+        center = (int(x), int(y))
+
+        if distance < 0.1:
+            # draw matched keypoints in red color
+            bill_center = center
+            color = (0, 0, 255)
+            count += 1
+        else:
+            # draw unmatched in blue color
+            # print distance
+            color = (255, 0, 0)
+
+        # Draw matched key points on original image
+        cv2.circle(frame, center, 2, color, -1)
+
+    print float(count) / len(descriptor)
+
+    # if 50% of the poins matches, write in the bill
+    if float(count) / len(descriptor) >= 0.5:
+        # cv2.putText(img,">>BIG BOX<<", (int(x),int(y)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255))
+        cv2.putText(frame, ">>" + bill_name + "<<", bill_center, cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
 
 
 # SURF extraction
@@ -18,17 +51,17 @@ print "opening templates images..."
 # FRONT
 temp_002_front = glib.readGrayImage("files/template/front/05.jpg")
 temp_005_front = glib.readGrayImage("files/template/front/05.jpg")
-temp_010_front = glib.readGrayImage("files/template/front/05.jpg")
+temp_010_front = glib.readGrayImage("files/template/front/20.jpg")
 temp_020_front = glib.readGrayImage("files/template/front/20.jpg")
-temp_050_front = glib.readGrayImage("files/template/front/05.jpg")
-temp_100_front = glib.readGrayImage("files/template/front/05.jpg")
+temp_050_front = glib.readGrayImage("files/template/front/20.jpg")
+temp_100_front = glib.readGrayImage("files/template/front/20.jpg")
 # BACK
 temp_002_back = glib.readGrayImage("files/template/back/05.jpg")
 temp_005_back = glib.readGrayImage("files/template/back/05.jpg")
-temp_010_back = glib.readGrayImage("files/template/back/05.jpg")
+temp_010_back = glib.readGrayImage("files/template/back/20.jpg")
 temp_020_back = glib.readGrayImage("files/template/back/20.jpg")
-temp_050_back = glib.readGrayImage("files/template/back/05.jpg")
-temp_100_back = glib.readGrayImage("files/template/back/05.jpg")
+temp_050_back = glib.readGrayImage("files/template/back/20.jpg")
+temp_100_back = glib.readGrayImage("files/template/back/20.jpg")
 
 # get keypoints and descriptors for each template
 # FRONT
@@ -55,6 +88,7 @@ cap = cv2.VideoCapture(0)
 knn = cv2.ml.KNearest_create()
 
 while True:
+    global frame
     # Capture frame-by-frame
     ret, frame = cap.read()
 
@@ -71,8 +105,18 @@ while True:
     # kNN training
     knn.train(samples, cv2.ml.ROW_SAMPLE, responses)
 
-    # TODO for each template, test if has found a correspondent bill
-    my_awesome_function()
+    # regognize bill acording to the descriptor
+    # recognize_bill(desc_002_back, "2 Reais")
+    recognize_bill(desc_005_back, "5 Reais")
+    # recognize_bill(desc_010_back, "10 Reais")
+    recognize_bill(desc_020_back, "20 Reais")
+    # recognize_bill(desc_050_back, "50 Reais")
+
+    # recognize_bill(desc_002_front, "2 Reais")
+    recognize_bill(desc_005_front, "5 Reais")
+    # recognize_bill(desc_010_front, "10 Reais")
+    recognize_bill(desc_020_front, "20 Reais")
+    # recognize_bill(desc_050_front, "50 Reais")
 
     # Display the result of the processing
     glib.display_frame("frame", frame)
