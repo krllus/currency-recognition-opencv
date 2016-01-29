@@ -45,23 +45,24 @@ def recognize_bill(descriptor, bill_name):
 
 # SURF extraction
 surf = cv2.xfeatures2d.SURF_create()
+surf.setHessianThreshold(500)
 
 print "opening templates images..."
 # get the templates
 # FRONT
-temp_002_front = glib.readGrayImage("files/template/front/05.jpg")
+temp_002_front = glib.readGrayImage("files/template/front/02.jpg")
 temp_005_front = glib.readGrayImage("files/template/front/05.jpg")
-temp_010_front = glib.readGrayImage("files/template/front/20.jpg")
+temp_010_front = glib.readGrayImage("files/template/front/10.jpg")
 temp_020_front = glib.readGrayImage("files/template/front/20.jpg")
-temp_050_front = glib.readGrayImage("files/template/front/20.jpg")
-temp_100_front = glib.readGrayImage("files/template/front/20.jpg")
+temp_050_front = glib.readGrayImage("files/template/front/50.jpg")
+temp_100_front = glib.readGrayImage("files/template/front/100.jpg")
 # BACK
-temp_002_back = glib.readGrayImage("files/template/back/05.jpg")
+temp_002_back = glib.readGrayImage("files/template/back/02.jpg")
 temp_005_back = glib.readGrayImage("files/template/back/05.jpg")
-temp_010_back = glib.readGrayImage("files/template/back/20.jpg")
+temp_010_back = glib.readGrayImage("files/template/back/10.jpg")
 temp_020_back = glib.readGrayImage("files/template/back/20.jpg")
-temp_050_back = glib.readGrayImage("files/template/back/20.jpg")
-temp_100_back = glib.readGrayImage("files/template/back/20.jpg")
+temp_050_back = glib.readGrayImage("files/template/back/50.jpg")
+temp_100_back = glib.readGrayImage("files/template/back/100.jpg")
 
 # get keypoints and descriptors for each template
 # FRONT
@@ -88,7 +89,7 @@ cap = cv2.VideoCapture(0)
 knn = cv2.ml.KNearest_create()
 
 while True:
-    global frame
+    frame
     # Capture frame-by-frame
     ret, frame = cap.read()
 
@@ -106,23 +107,30 @@ while True:
     knn.train(samples, cv2.ml.ROW_SAMPLE, responses)
 
     # regognize bill acording to the descriptor
-    # recognize_bill(desc_002_back, "2 Reais")
-    recognize_bill(desc_005_back, "5 Reais")
-    # recognize_bill(desc_010_back, "10 Reais")
-    recognize_bill(desc_020_back, "20 Reais")
-    # recognize_bill(desc_050_back, "50 Reais")
+    recognize_bill(desc_002_back, "2 Reais Back")
+    recognize_bill(desc_005_back, "5 Reais Back")
+    recognize_bill(desc_010_back, "10 Reais Back")
+    recognize_bill(desc_020_back, "20 Reais Back")
+    recognize_bill(desc_050_back, "50 Reais Back")
+    recognize_bill(desc_100_back, "100 Reais Back")
 
-    # recognize_bill(desc_002_front, "2 Reais")
-    recognize_bill(desc_005_front, "5 Reais")
-    # recognize_bill(desc_010_front, "10 Reais")
-    recognize_bill(desc_020_front, "20 Reais")
-    # recognize_bill(desc_050_front, "50 Reais")
+    recognize_bill(desc_002_front, "2 Reais Front")
+    recognize_bill(desc_005_front, "5 Reais Front")
+    recognize_bill(desc_010_front, "10 Reais Front")
+    recognize_bill(desc_020_front, "20 Reais Front")
+    recognize_bill(desc_050_front, "50 Reais Front")
+    recognize_bill(desc_100_front, "100 Reais Front")
+
+    # print a new line
+    print "\n"
 
     # Display the result of the processing
     glib.display_frame("frame", frame)
 
     # run until press 'q'
     if cv2.waitKey(1) & 0xFF == ord('q'):
+        # saving the frame image
+        cv2.imwrite('frame.png', frame)
         break
 
 # When everything done, release the capture
